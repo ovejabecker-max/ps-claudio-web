@@ -5,11 +5,13 @@ import {
   CheckCircle2, Video, MapPin
 } from 'lucide-react';
 import { SERVICES, TIME_SLOTS } from '../constants/data';
+import PaymentCheckout from './PaymentCheckout';
 
 const BookingModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [preferenceId, setPreferenceId] = useState(null);
   
   const [bookingData, setBookingData] = useState({
     service: '',
@@ -50,43 +52,15 @@ const BookingModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // 1. Número de WhatsApp del terapeuta
-    const numeroTerapeuta = "56985352846"; 
-    
-    // 2. Formatear la fecha seleccionada
-    const fechaFormateada = bookingData.date.toLocaleDateString('es-CL', { 
-      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
-    });
+    // Simulación de generación de Preference ID (En producción esto vendría de un backend)
+    const fakePreferenceId = "demo_pref_" + Math.random().toString(36).substr(2, 9);
 
-    // 3. Crear el mensaje estructurado
-    const mensajeTexto = `¡Hola Ps. Claudio! Quiero agendar una sesión:
-    
-*Detalles del servicio:*
-- Servicio: ${bookingData.service}
-- Modalidad: ${bookingData.modality.toUpperCase()}
-- Fecha: ${fechaFormateada}
-- Hora: ${bookingData.time} hrs
-
-*Mis datos:*
-- Nombre: ${bookingData.name}
-- Email: ${bookingData.email}
-- Teléfono: ${bookingData.phone}
-${bookingData.notes ? `- Motivo/Notas: ${bookingData.notes}` : ''}
-
-Quedo atento a la confirmación. ¡Gracias!`;
-
-    // 4. Codificar el mensaje para la URL
-    const mensajeCodificado = encodeURIComponent(mensajeTexto);
-    const urlWhatsapp = `https://wa.me/${numeroTerapeuta}?text=${mensajeCodificado}`;
-
-    // 5. Simular un pequeño tiempo de carga visual y luego redirigir
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
-      // Abrir WhatsApp en una nueva pestaña
-      window.open(urlWhatsapp, '_blank');
-      console.log('Datos de reserva enviados a WhatsApp');
-    }, 1000);
+      setPreferenceId(fakePreferenceId);
+      console.log('Datos de reserva procesados. Mostrando pasarela de pago.');
+    }, 1500);
   };
 
   // --- Sub-componente Calendario Simple ---
@@ -113,7 +87,7 @@ Quedo atento a la confirmación. ¡Gracias!`;
 
       days.push(
         <button
-          key={d}
+          key={`day-${d}-${currentMonth.getMonth()}`}
           type="button"
           disabled={isPast || isWeekend}
           onClick={() => onDateSelect(date)}
@@ -138,7 +112,7 @@ Quedo atento a la confirmación. ¡Gracias!`;
           </div>
         </div>
         <div className="grid grid-cols-7 gap-1 text-center mb-2">
-          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(day => <div key={day} className="text-xs font-bold text-slate-400">{day}</div>)}
+          {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, idx) => <div key={`${day}-${idx}`} className="text-xs font-bold text-slate-400">{day}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1">
           {days}
@@ -182,22 +156,37 @@ Quedo atento a la confirmación. ¡Gracias!`;
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           
           {isSuccess ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mb-6 animate-[bounce_1s_ease-in-out]">
-                <CheckCircle2 className="w-10 h-10 text-teal-600" />
+            <div className="flex flex-col items-center justify-center py-4 text-center">
+              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-4 animate-[bounce_1s_ease-in-out]">
+                <CheckCircle2 className="w-8 h-8 text-teal-600" />
               </div>
-              <h3 className="text-3xl font-bold text-slate-900 mb-2">¡Reserva Solicitada!</h3>
-              <p className="text-slate-600 max-w-md mx-auto mb-8">
-                Gracias, <span className="font-bold text-teal-700">{bookingData.name}</span>. Hemos recibido tu solicitud para <span className="font-bold">{bookingData.service}</span>. 
-                Se ha abierto una ventana de WhatsApp para que completes tu reserva con Claudio.
+              <h3 className="text-2xl font-bold text-slate-900 mb-1">¡Reserva Solicitada!</h3>
+              <p className="text-slate-600 text-sm max-w-md mx-auto mb-4">
+                Excelente, <span className="font-bold text-teal-700">{bookingData.name}</span>. Para asegurar tu cupo para <span className="font-bold">{bookingData.service}</span>, completa el pago a continuación.
               </p>
-              <button 
-                type="button"
-                onClick={onClose}
-                className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-teal-600 transition-colors shadow-lg"
-              >
-                Finalizar
-              </button>
+
+              {/* Integración de Mercado Pago */}
+              <div className="w-full max-w-sm mx-auto">
+                <PaymentCheckout preferenceId={preferenceId} />
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 w-full">
+                <p className="text-xs text-slate-400 mb-4">¿Prefieres pagar después o tienes dudas?</p>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const numeroTerapeuta = "56985352846";
+                    const fechaFormateada = bookingData.date.toLocaleDateString('es-CL', { 
+                      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+                    });
+                    const mensajeTexto = `¡Hola Ps. Claudio! Ya registré mi solicitud para ${bookingData.service} el ${fechaFormateada} a las ${bookingData.time}. Prefiero coordinar el pago directamente.`;
+                    window.open(`https://wa.me/${numeroTerapeuta}?text=${encodeURIComponent(mensajeTexto)}`, '_blank');
+                  }}
+                  className="text-sm font-bold text-teal-600 hover:text-teal-700 transition-colors"
+                >
+                  Contactar por WhatsApp
+                </button>
+              </div>
             </div>
           ) : (
             <>
