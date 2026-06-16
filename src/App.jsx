@@ -1,95 +1,56 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, MapPin, Video, BrainCircuit,
-  HeartHandshake, Sparkles, ArrowRight, Star,
-  GraduationCap, Phone, Mail, Quote,
+  HeartHandshake, ArrowRight, Star,
+  GraduationCap, Phone, Quote,
   Users, Dna, Zap, CalendarDays, Activity,
-  ChevronRight, ShieldCheck, Clock
+  ChevronRight, ShieldCheck,
+  Instagram, Facebook, Youtube, Linkedin
 } from 'lucide-react';
 import ElevenLabsWidget from './components/ElevenLabsWidget';
+import BookingModal from './components/BookingModal';
+import InteractiveReviews from './components/InteractiveReviews';
+import FadeIn from './components/FadeIn';
+import TiltCard from './components/TiltCard';
+import SplitText from './components/SplitText';
 
-// --- Componente de Animación al Scroll ---
-const FadeIn = ({ children, delay = 0, direction = 'up' }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
+// --- Constantes de Navegación ---
+const NAV_LINKS = [
+  { name: 'Inicio', href: '#home' },
+  { name: 'Filosofía', href: '#about' },
+  { name: 'Especialidades', href: '#specialties' },
+  { name: 'Servicios', href: '#services' },
+  { name: 'Formación', href: '#education' },
+];
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(domRef.current);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    const current = domRef.current;
-    if (current) observer.observe(current);
-    
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
+const SPECIALTIES = [
+  { title: 'Terapias Mente-Cuerpo', icon: BrainCircuit, color: 'text-indigo-600', bg: 'bg-indigo-100', border: 'hover:border-indigo-300', desc: 'Conexión profunda entre procesos psicológicos y el bienestar físico.' },
+  { title: 'Constelaciones Familiares', icon: Users, color: 'text-teal-600', bg: 'bg-teal-100', border: 'hover:border-teal-300', desc: 'Resolución de dinámicas ocultas en el sistema familiar que afectan el presente.' },
+  { title: 'Terapia Transgeneracional', icon: Dna, color: 'text-blue-600', bg: 'bg-blue-100', border: 'hover:border-blue-300', desc: 'Sanación de patrones heredados y lealtades familiares inconscientes.' },
+  { title: 'Decodificación Biológica', icon: Zap, color: 'text-rose-600', bg: 'bg-rose-100', border: 'hover:border-rose-300', desc: 'Bioneuroemoción para entender el origen emocional de los síntomas físicos.' },
+];
 
-  const getTransform = () => {
-    if (isVisible) return 'translate-y-0 translate-x-0';
-    switch (direction) {
-      case 'up': return 'translate-y-10';
-      case 'down': return '-translate-y-10';
-      case 'left': return 'translate-x-10';
-      case 'right': return '-translate-x-10';
-      default: return 'translate-y-10';
-    }
-  };
+const CONDITIONS = [
+  'Estrés', 'Problemas de autoestima', 'Fobias', 'Insomnio', 
+  'Cefalea', 'Trastornos por abusos sexuales', 'Trastorno por menopausia', 
+  'Crisis en la relación de pareja', 'Crisis en relación padres e hijos', 'Adicciones'
+];
 
-  return (
-    <div
-      ref={domRef}
-      className={`transition-all duration-1000 ease-out ${
-        isVisible ? 'opacity-100' : 'opacity-0'
-      } ${getTransform()}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-};
+const SERVICES = [
+  { name: 'Consulta Terapeuta complementario', price: '$35.000', icon: HeartHandshake },
+  { name: 'Bioneuroemoción', price: '$35.000 - $50.000', icon: Zap },
+  { name: 'Constelaciones Familiares', price: '$35.000', icon: Users },
+  { name: 'Consulta online', price: '$35.000', icon: Video },
+  { name: 'Hipnosis', price: '$35.000', icon: BrainCircuit },
+  { name: 'Coaching en adicciones', price: '$35.000', icon: Activity },
+  { name: 'Terapia de parejas', price: '$35.000', icon: Users },
+];
 
-// --- Componente Tarjeta Magnética 3D (Propuesta 4) ---
-const TiltCard = ({ children, className = '' }) => {
-  const [transform, setTransform] = useState('');
-  const cardRef = useRef(null);
-
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -15; // Rotación máxima
-    const rotateY = ((x - centerX) / centerX) * 15;
-    
-    setTransform(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
-  };
-
-  const handleMouseLeave = () => {
-    setTransform('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
-  };
-
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className={`transition-transform duration-300 ease-out will-change-transform ${className}`}
-      style={{ transform }}
-    >
-      {children}
-    </div>
-  );
-};
+const EDUCATION = [
+  { title: 'Bioneuroemoción', inst: 'ENRIC CORBERA INSTITUTE ESPAÑA', desc: 'Avalado por la Facultad de Medicina, Universidad Nacional del Nordeste de Argentina.' },
+  { title: 'Terapia Holística', inst: 'COLEGIO DE TERAPEUTAS HOLISTICOS', desc: 'Sexta Región, Chile.' },
+  { title: 'Capacitación Continua', inst: 'PRO CAPACITA', desc: 'Rancagua, Chile.' },
+];
 
 // --- Fondo Abstracto Fluido ---
 const AbstractBackground = ({ theme }) => {
@@ -136,52 +97,12 @@ const CustomCursor = () => {
   );
 };
 
-// --- Componente Animación Tipográfica Cinematográfica ---
-const SplitText = ({ words, delayOffset = 0, className = '' }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const domRef = useRef();
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(domRef.current);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    const current = domRef.current;
-    if (current) observer.observe(current);
-    return () => {
-      if (current) observer.unobserve(current);
-    };
-  }, []);
-
-  return (
-    <div ref={domRef} className={`inline-block ${className}`}>
-      {words.map((item, i) => (
-        <span key={i} className="inline-block overflow-hidden pb-3 mr-[0.25em] align-bottom">
-          <span
-            className={`inline-block transition-transform duration-800 ease-[cubic-bezier(0.25,1,0.5,1)] ${isVisible ? 'translate-y-0' : 'translate-y-[120%]'} ${item.highlight ? `text-transparent bg-clip-text bg-linear-to-r ${item.highlight}` : ''}`}
-            style={{ transitionDelay: `${delayOffset + i * 150}ms` }}
-          >
-            {item.text}
-          </span>
-        </span>
-      ))}
-    </div>
-  );
-};
-
-
-
-
 // --- Componente Principal ---
 export default function App() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState('light');
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   // Manejo del Navbar on scroll y Scrollytelling
   useEffect(() => {
@@ -212,14 +133,6 @@ export default function App() {
     };
   }, []);
 
-  const navLinks = [
-    { name: 'Inicio', href: '#home' },
-    { name: 'Filosofía', href: '#about' },
-    { name: 'Especialidades', href: '#specialties' },
-    { name: 'Servicios', href: '#services' },
-    { name: 'Formación', href: '#education' },
-  ];
-
   return (
     <div className={`min-h-screen font-sans transition-colors duration-1000 md:cursor-none ${theme === 'dark' ? 'text-slate-100 selection:bg-teal-500 selection:text-white' : 'text-slate-800 selection:bg-teal-200 selection:text-teal-900'}`}>
       <CustomCursor />
@@ -234,9 +147,9 @@ export default function App() {
         }`}
       >
         <div className="container mx-auto px-6 md:px-12 flex justify-between items-center">
-          <a href="#home" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-teal-500 to-blue-600 flex items-center justify-center text-white shadow-lg group-hover:shadow-teal-500/30 transition-shadow">
-              <Sparkles className="w-6 h-6" />
+          <a href="#home" className="flex items-center gap-4 group">
+            <div className="w-12 h-12 flex items-center justify-center transition-transform group-hover:scale-110">
+              <img src="/logo_claudio.png" alt="Logo Ps. Claudio Ballesteros" className="max-w-full max-h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <span className={`font-bold text-xl leading-none tracking-tight transition-colors duration-500 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Ps. Claudio Ballesteros</span>
@@ -246,7 +159,7 @@ export default function App() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
@@ -255,12 +168,12 @@ export default function App() {
                 {link.name}
               </a>
             ))}
-            <a
-              href="#contact"
+            <button
+              onClick={() => setIsBookingModalOpen(true)}
               className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors shadow-lg hover:shadow-teal-500/30 ${theme === 'dark' ? 'bg-teal-500 text-slate-900 hover:bg-teal-400' : 'bg-slate-900 text-white hover:bg-teal-600'}`}
             >
               Agendar Hora
-            </a>
+            </button>
           </nav>
 
           {/* Mobile Menu Toggle */}
@@ -275,7 +188,7 @@ export default function App() {
         {/* Mobile Nav */}
         {isMobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-md shadow-lg border-t border-slate-100 py-4 px-6 flex flex-col gap-4">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
@@ -285,13 +198,15 @@ export default function App() {
                 {link.name}
               </a>
             ))}
-            <a
-              href="#contact"
-              onClick={() => setIsMobileMenuOpen(false)}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsBookingModalOpen(true);
+              }}
               className="mt-2 text-center px-6 py-3 rounded-xl bg-teal-600 text-white font-semibold shadow-md"
             >
               Agendar Hora
-            </a>
+            </button>
           </div>
         )}
       </header>
@@ -299,13 +214,7 @@ export default function App() {
       <main>
         {/* --- Hero Section --- */}
         <section id="home" data-theme="light" className="pt-32 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-          <div className="flex-1 text-center lg:text-left">
-            <FadeIn>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100/50 border border-teal-200/50 text-teal-700 text-sm font-semibold mb-6">
-                <Star className="w-4 h-4 fill-teal-600" />
-                <span>Especialista altamente valorado en Doctoralia</span>
-              </div>
-            </FadeIn>
+          <div className="flex-1 text-center lg:text-left lg:-mt-[100px]">
             <FadeIn delay={100}>
               <h1 className={`text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.1] transition-colors duration-1000 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
                 <SplitText 
@@ -326,10 +235,13 @@ export default function App() {
             </FadeIn>
             <FadeIn delay={700}>
               <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-                <a href="#contact" className="w-full sm:w-auto px-8 py-4 rounded-full bg-linear-to-r from-teal-600 to-blue-600 text-white font-bold shadow-xl shadow-teal-500/20 hover:shadow-teal-500/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                <button 
+                  onClick={() => setIsBookingModalOpen(true)}
+                  className="w-full sm:w-auto px-8 py-4 rounded-full bg-linear-to-r from-teal-600 to-blue-600 text-white font-bold shadow-xl shadow-teal-500/20 hover:shadow-teal-500/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-2"
+                >
                   <CalendarDays className="w-5 h-5" />
                   Reserva tu sesión
-                </a>
+                </button>
                 <a href="#about" className={`w-full sm:w-auto px-8 py-4 rounded-full font-semibold shadow-md transition-all flex items-center justify-center gap-2 border ${theme === 'dark' ? 'bg-white/10 text-white border-white/20 hover:bg-white/20' : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'}`}>
                   Conoce mi enfoque
                 </a>
@@ -343,34 +255,23 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-teal-500" />
-                  <span>Presencial en Rancagua</span>
+                  <span>Presencial en Astorga 219, Rancagua</span>
                 </div>
               </div>
             </FadeIn>
           </div>
           
-          <div className="flex-1 w-full max-w-md lg:max-w-full relative mt-12 lg:mt-0">
-            <FadeIn delay={200} direction="left">
-              {/* Elementos Respirables y Formas Fluidas (Imagen en arco) */}
-              <div className="relative aspect-4/5 rounded-t-[10rem] rounded-b-[3rem] overflow-hidden shadow-2xl shadow-teal-900/10 border-4 border-white/50 bg-white/20 backdrop-blur-sm p-3">
-                <div className="w-full h-full rounded-t-[10rem] rounded-b-[2.5rem] overflow-hidden bg-slate-200 relative flex items-center justify-center text-slate-400">
-                  <div className="absolute inset-0 bg-linear-to-tr from-teal-500/20 to-blue-500/20 mix-blend-overlay"></div>
-                  <div className="text-center p-6">
-                     <span className="text-sm border border-slate-300 rounded px-2 py-1"></span>
-                  </div>
-                </div>
-                
-                {/* Floating Badge */}
-                <div className="absolute bottom-8 -left-4 md:-left-8 bg-white p-4 rounded-3xl shadow-xl border border-slate-100 flex items-center gap-4 animate-[bounce_5s_ease-in-out_infinite]">
-                  <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center shrink-0">
-                    <Star className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-slate-900">+38 Opiniones</div>
-                    <div className="text-sm text-slate-500">Pacientes satisfechos</div>
-                  </div>
+          <div className="flex-1 w-full max-w-lg lg:max-w-full relative mt-0 lg:-mt-[380px] perspective-1000">
+            <FadeIn delay={50}>
+              <div className="flex justify-center mb-[-30px] mt-[200px] relative z-30">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-100/50 border border-teal-200/50 text-teal-700 text-sm font-semibold">
+                  <Star className="w-4 h-4 fill-teal-600" />
+                  <span>Especialista altamente valorado en Doctoralia</span>
                 </div>
               </div>
+            </FadeIn>
+            <FadeIn delay={200} direction="left">
+              <InteractiveReviews />
             </FadeIn>
           </div>
         </section>
@@ -438,12 +339,7 @@ export default function App() {
             </FadeIn>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                { title: 'Terapias Mente-Cuerpo', icon: BrainCircuit, color: 'text-indigo-600', bg: 'bg-indigo-100', border: 'hover:border-indigo-300', desc: 'Conexión profunda entre procesos psicológicos y el bienestar físico.' },
-                { title: 'Constelaciones Familiares', icon: Users, color: 'text-teal-600', bg: 'bg-teal-100', border: 'hover:border-teal-300', desc: 'Resolución de dinámicas ocultas en el sistema familiar que afectan el presente.' },
-                { title: 'Terapia Transgeneracional', icon: Dna, color: 'text-blue-600', bg: 'bg-blue-100', border: 'hover:border-blue-300', desc: 'Sanación de patrones heredados y lealtades familiares inconscientes.' },
-                { title: 'Decodificación Biológica', icon: Zap, color: 'text-rose-600', bg: 'bg-rose-100', border: 'hover:border-rose-300', desc: 'Bioneuroemoción para entender el origen emocional de los síntomas físicos.' },
-              ].map((spec, idx) => (
+              {SPECIALTIES.map((spec, idx) => (
                 <FadeIn key={idx} delay={idx * 100}>
                   {/* Tarjetas 3D Magnéticas */}
                   <TiltCard className="h-full">
@@ -475,11 +371,7 @@ export default function App() {
             </FadeIn>
             <FadeIn delay={200}>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                {[
-                  'Estrés', 'Problemas de autoestima', 'Fobias', 'Insomnio', 
-                  'Cefalea', 'Trastornos por abusos sexuales', 'Trastorno por menopausia', 
-                  'Crisis en la relación de pareja', 'Crisis en relación padres e hijos', 'Adicciones'
-                ].map((condition, idx) => (
+                {CONDITIONS.map((condition, idx) => (
                   <div key={idx} className="px-5 py-2.5 rounded-full bg-white/10 border border-white/20 hover:bg-white/20 transition-colors backdrop-blur-sm text-sm font-medium">
                     {condition}
                   </div>
@@ -500,15 +392,7 @@ export default function App() {
             </FadeIn>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {[
-                { name: 'Consulta Terapeuta complementario', price: '$35.000', icon: HeartHandshake },
-                { name: 'Bioneuroemoción', price: '$35.000 - $50.000', icon: Zap },
-                { name: 'Constelaciones Familiares', price: '$35.000', icon: Users },
-                { name: 'Consulta online', price: '$35.000', icon: Video },
-                { name: 'Hipnosis', price: '$35.000', icon: BrainCircuit },
-                { name: 'Coaching en adicciones', price: '$35.000', icon: Activity },
-                { name: 'Terapia de parejas', price: 'Desde $35.000', icon: Users },
-              ].map((service, idx) => (
+              {SERVICES.map((service, idx) => (
                 <FadeIn key={idx} delay={idx * 50}>
                   <div className="flex items-center justify-between p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
                     <div className="flex items-center gap-4">
@@ -527,9 +411,12 @@ export default function App() {
 
             <FadeIn delay={400}>
               <div className="mt-12 text-center">
-                <a href="#contact" className="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-700 transition-colors">
+                <button 
+                  onClick={() => setIsBookingModalOpen(true)}
+                  className="inline-flex items-center gap-2 text-teal-600 font-bold hover:text-teal-700 transition-colors"
+                >
                   Consultar disponibilidad de horarios <ArrowRight className="w-4 h-4" />
-                </a>
+                </button>
               </div>
             </FadeIn>
           </div>
@@ -548,11 +435,7 @@ export default function App() {
             </FadeIn>
 
             <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-linear-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-              {[
-                { title: 'Bioneuroemoción', inst: 'ENRIC CORBERA INSTITUTE ESPAÑA', desc: 'Avalado por la Facultad de Medicina, Universidad Nacional del Nordeste de Argentina.' },
-                { title: 'Terapia Holística', inst: 'COLEGIO DE TERAPEUTAS HOLISTICOS', desc: 'Sexta Región, Chile.' },
-                { title: 'Capacitación Continua', inst: 'PRO CAPACITA', desc: 'Rancagua, Chile.' },
-              ].map((edu, idx) => (
+              {EDUCATION.map((edu, idx) => (
                 <FadeIn key={idx} delay={idx * 150}>
                   <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                     <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-teal-500 text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
@@ -573,83 +456,107 @@ export default function App() {
         </section>
 
         {/* --- Contact & Location --- */}
-        <section id="contact" data-theme="light" className="py-24 relative overflow-hidden">
+        <section id="contact" data-theme="light" className="min-h-screen flex items-center py-12 relative overflow-hidden">
           <div className="container mx-auto px-6 md:px-12 max-w-6xl relative z-10">
-            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col lg:flex-row">
+            <div className="bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden flex flex-col lg:flex-row lg:max-h-[90vh]">
               {/* Info Side */}
-              <div className="p-10 md:p-16 lg:w-5/12 bg-linear-to-br from-slate-900 to-teal-950 text-white flex flex-col justify-between relative overflow-hidden">
+              <div className="p-8 md:p-12 lg:w-5/12 bg-linear-to-br from-slate-900 to-teal-950 text-white flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl"></div>
                 
                 <div className="relative z-10">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-6">Inicia tu sanación hoy.</h2>
-                  <p className="text-teal-100/80 mb-12">Agenda tu hora presencial u online y da el primer paso hacia tu bienestar emocional.</p>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4">Inicia tu sanación hoy.</h2>
+                  <p className="text-teal-100/80 text-sm mb-8">Agenda tu hora presencial u online.</p>
                   
-                  <div className="space-y-6">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-white/10 rounded-xl shrink-0">
-                        <MapPin className="w-6 h-6 text-teal-300" />
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-white/10 rounded-lg shrink-0">
+                        <MapPin className="w-5 h-5 text-teal-300" />
                       </div>
                       <div>
-                        <p className="font-semibold text-white">Consulta Presencial</p>
-                        <p className="text-teal-100/70 text-sm mt-1">Valparaíso 371<br/>Rancagua, Región de O'Higgins</p>
+                        <p className="font-semibold text-white text-sm">Consulta Presencial</p>
+                        <p className="text-teal-100/70 text-xs mt-0.5">Astorga 219, Of. 6<br/>Rancagua</p>
                       </div>
                     </div>
-                    
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-white/10 rounded-xl shrink-0">
-                        <Video className="w-6 h-6 text-teal-300" />
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-white/10 rounded-lg shrink-0">
+                        <Phone className="w-5 h-5 text-teal-300" />
                       </div>
                       <div>
-                        <p className="font-semibold text-white">Consulta Online</p>
-                        <p className="text-teal-100/70 text-sm mt-1">Atención vía telemedicina para todo Chile y el extranjero.</p>
+                        <p className="font-semibold text-white text-sm">Teléfono</p>
+                        <p className="text-teal-100/70 text-xs mt-0.5">+56 9 8535 2846</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-16 relative z-10">
-                  <a 
-                    href="https://www.doctoralia.cl/claudio-ballesteros-pulgares/terapeuta-complementario/rancagua" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-teal-500 text-slate-900 font-bold hover:bg-teal-400 transition-colors shadow-lg shadow-teal-500/30"
+                <div className="mt-8 relative z-10">
+                  <button 
+                    onClick={() => setIsBookingModalOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-teal-500 text-slate-900 font-bold hover:bg-teal-400 transition-colors shadow-lg text-sm"
                   >
-                    Agendar en Doctoralia <ChevronRight className="w-5 h-5" />
-                  </a>
+                    Agendar Sesión <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
 
-              {/* Map/Image Side */}
-              <div className="lg:w-7/12 min-h-100 bg-slate-100 relative flex items-center justify-center">
-                 {/* Aquí idealmente iría un iframe de Google Maps, usamos un placeholder elegante por restricciones */}
-                 <div className="absolute inset-0 bg-slate-200">
-                    <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 space-y-4 p-8 text-center bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-80">
-                      <MapPin className="w-16 h-16 text-slate-300" />
-                      <div className="border border-slate-300 rounded-md px-4 py-2 bg-white/50 backdrop-blur-sm">
-                         
-                      </div>
-                      <p className="text-sm font-medium">Ubicación céntrica en Rancagua, de fácil acceso.</p>
-                    </div>
-                 </div>
+              {/* Map Side */}
+              <div className="lg:w-7/12 h-[350px] lg:h-auto bg-slate-100 relative">
+                 <iframe 
+                   title="Ubicación Ps. Claudio Ballesteros"
+                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3310.245846614488!2d-70.7425!3d-34.1685!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9663433e3870349b%3A0x6734c56730a08f5d!2sAstorga%20219%2C%20Rancagua%2C%20O'Higgins!5e0!3m2!1ses-419!2scl!4v1717270000000!5m2!1ses-419!2scl"
+                   className="absolute inset-0 w-full h-full border-0"
+                   allowFullScreen="" 
+                   loading="lazy" 
+                   referrerPolicy="no-referrer-when-downgrade"
+                 ></iframe>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* --- Footer --- */}
       <footer className="bg-slate-50 py-12 border-t border-slate-200 text-center">
         <div className="container mx-auto px-6">
           <div className="flex justify-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center text-teal-600">
-              <Sparkles className="w-6 h-6" />
+            <div className="relative w-24 h-24 flex items-center justify-center transition-transform hover:scale-110 group">
+              {/* Resplandor circular con los colores del logo */}
+              <div className="absolute inset-0 rounded-full bg-linear-to-tr from-teal-400 via-blue-500 to-indigo-600 blur-xl opacity-85 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <img src="/logo_claudio.png" alt="Logo Ps. Claudio Ballesteros" className="relative z-10 max-w-full max-h-full object-contain" />
             </div>
           </div>
           <h3 className="font-bold text-xl text-slate-900 mb-2">Ps. Claudio Ballesteros Pulgares</h3>
           <p className="text-slate-500 text-sm mb-8">Terapeuta Complementario • Rancagua, Chile</p>
           
+          {/* Redes Sociales Innovadoras */}
+          <div className="flex justify-center gap-4 mb-10">
+            {[
+              { icon: Instagram, href: 'https://www.instagram.com/claudioballesterosterapeuta/', label: 'Instagram', color: 'hover:text-pink-500 hover:shadow-pink-500/20' },
+              { icon: Facebook, href: 'https://www.facebook.com/ClaudioBallesterosterapeuta/', label: 'Facebook', color: 'hover:text-blue-600 hover:shadow-blue-600/20' },
+              { icon: Youtube, href: 'https://youtube.com/@claudioballesterosterapeut6741?si=w9HAFh31PvwivEOZ', label: 'YouTube', color: 'hover:text-red-600 hover:shadow-red-600/20' },
+              { icon: Linkedin, href: 'https://www.linkedin.com/pub/dir/Claudio/Ballesteros', label: 'LinkedIn', color: 'hover:text-blue-700 hover:shadow-blue-700/20' }
+            ].map((social, idx) => (
+              <a
+                key={idx}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.label}
+                className={`group relative p-3 rounded-2xl bg-white border border-slate-200 text-slate-400 shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl ${social.color} hover:border-transparent`}
+              >
+                {/* Background Glow en Hover */}
+                <div className="absolute inset-0 rounded-2xl bg-current opacity-0 group-hover:opacity-5 blur-xl transition-opacity duration-500"></div>
+                
+                <social.icon className="w-5 h-5 relative z-10 transition-transform duration-500 group-hover:scale-110" />
+                
+                {/* Indicador de Punto Decorativo */}
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-current rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500 transform scale-0 group-hover:scale-100"></div>
+              </a>
+            ))}
+          </div>
+          
           <div className="flex items-center justify-center gap-6 text-sm text-slate-500">
-            <a href="#" className="hover:text-teal-600 transition-colors">Doctoralia</a>
+            <a href="https://www.doctoralia.cl/claudio-ballesteros-pulgares/terapeuta-complementario/rancagua#profile-reviews" target="_blank" rel="noopener noreferrer" className="hover:text-teal-600 transition-colors">Doctoralia</a>
             <span>•</span>
             <a href="#home" className="hover:text-teal-600 transition-colors">Volver arriba</a>
           </div>
@@ -663,6 +570,11 @@ export default function App() {
 
       {/* Agent ID se lee desde Vite env (VITE_ELEVENLABS_AGENT_ID) para no hardcodear en el código fuente */}
       <ElevenLabsWidget />
+      
+      <BookingModal 
+        isOpen={isBookingModalOpen} 
+        onClose={() => setIsBookingModalOpen(false)} 
+      />
     </div>
   );
 }
