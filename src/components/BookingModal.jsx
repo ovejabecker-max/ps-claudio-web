@@ -2,23 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, ChevronRight, ChevronLeft, 
   Clock, User, Mail, Phone, MessageSquare, 
-  CheckCircle2, Video, MapPin, BrainCircuit,
-  Zap, Users, HeartHandshake, Activity
+  CheckCircle2, Video, MapPin
 } from 'lucide-react';
-
-const SERVICES_LIST = [
-  { id: 'complementaria', name: 'Consulta Terapeuta Complementario', icon: HeartHandshake, price: '$35.000' },
-  { id: 'bioneuroemocion', name: 'Bioneuroemoción', icon: Zap, price: '$35.000' },
-  { id: 'constelaciones', name: 'Constelaciones Familiares', icon: Users, price: '$35.000' },
-  { id: 'hipnosis', name: 'Hipnosis', icon: BrainCircuit, price: '$35.000' },
-  { id: 'coaching', name: 'Coaching en Adicciones', icon: Activity, price: '$35.000' },
-  { id: 'parejas', name: 'Terapia de Parejas', icon: Users, price: '$35.000' },
-  { id: 'online', name: 'Consulta Online', icon: Video, price: '$35.000' },
-];
-
-const TIME_SLOTS = [
-  '09:00', '10:00', '11:00', '12:00', '15:00', '16:00', '17:00', '18:00'
-];
+import { SERVICES, TIME_SLOTS } from '../constants/data';
 
 const BookingModal = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
@@ -239,7 +225,7 @@ Quedo atento a la confirmación. ¡Gracias!`;
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {SERVICES_LIST.map((service) => (
+                    {SERVICES.map((service) => (
                       <button
                         key={service.id}
                         type="button"
